@@ -17,8 +17,10 @@ module.exports = router;
     const connectionString = dbconfig.getDBConnectionPool();
     var s = new UserGetService();
 
-    const User = s.doGetAllPersons( connectionString );
-    User.then(( usersfound ) => {
+    const users = s.doGetAllPersons( connectionString );
+    console.log("Users Object wrapped in a Promise Get Service at the Controller! " + users );
+
+    users.then(( usersfound ) => {
              
         if( usersfound ){
             console.log("Yes, Number of found Users in Controller: " +  usersfound.length );
@@ -29,7 +31,11 @@ module.exports = router;
              console.log("Ups, No Users found in Controller! " );
              res.status(400).send( { message: 'Error Getting Users!'} ); 
             }
-        }); 
+
+     }).catch( error => {
+            console.log( "SQL error from Promise displayed in catch - Controller: " + error );
+            res.status(400).send( { message: 'No Users were found due to an SQL error inside Service !'} );
+     });
  
 }
  
@@ -40,8 +46,10 @@ module.exports = router;
     const connectionString = dbconfig.getDBConnectionPool();
     var s = new UserGetService();
     
-    const User = s.doGetPerson( connectionString, req.params.id );
-    User.then(( usersfound ) => {
+    const user = s.doGetPerson( connectionString, req.params.id );
+    console.log("User Object wrapped in a Promise Get Service at the Controller! " + user );
+
+    user.then(( usersfound ) => {
              
         if( usersfound ){
             console.log("Yes, 1 User found in Controller: " +  usersfound.length );
@@ -52,7 +60,11 @@ module.exports = router;
              console.log("Ups, No User found in Controller! " );
              res.status(400).send( { message: 'Error Getting the User!'} ); 
             }
-        }); 
+
+        }).catch( error => {
+            console.log( "SQL error from Promise displayed in catch - Controller: " + error );
+            res.status(400).send( { message: 'The User was not found due to an SQL error inside Service !'} );
+       });
          
-})
+});
 

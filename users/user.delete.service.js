@@ -3,38 +3,33 @@
 class UserDeleteService {
       
     
-  async doDeleteUser( con, id ) {
+ async doDeleteUser( con, id ) {
      
-    try {
-        let userdeleted = false;
-        
-        await new Promise((res, rej) => {
+      let userdeletedpromise = await new Promise((resolve, reject) => {
      
-        con.query("DELETE FROM node_crud_signup_jwt WHERE Id=" + id, function (err, result, fields) {
-       if (err) throw err;
-       else {
-          
-           if( result.affectedRows === 1 ){
-               console.log( result.affectedRows + " User deleted in Service !");
-               userdeleted = true;
-               res( true );
-               }
+          con.query("DELETE FROM node_crud_signup_jwt WHERE Id=" + id, function (err, result, fields) {
+          if ( err ) 
+                reject( true );
           else {
-               console.log( "User not deleted in Service !" );
-               userdeleted = false;
-               res( false );
-            }
-          }
-       });
+          
+                 if( result.affectedRows === 1 ){
+                     console.log( result.affectedRows + " User deleted in Service !");
+                     resolve( true );
+                     }
+                 else {
+                      console.log( "User not deleted in Service !" );
+                      resolve( false );
+                    }
+                }
+            });
  
-     });
-         
-     return userdeleted;
-     } 
-     catch (err) {
-        console.log(err)
-      }
- }
+          });
+      
+       // Returning the resolved promise true / false according to row affected which means if the User
+       // was deleted or not
+       return userdeletedpromise;
+
+    }
 
 
 }

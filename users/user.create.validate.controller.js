@@ -20,24 +20,43 @@ router.post('/', function (req, res, next) {
          const connectionString = dbconfig.getDBConnectionPool();
          var s = new UserCreateValidateService();
         
-         const User = s.ValidateMailCreateUser( connectionString, req.body.email );
-         User.then(( isemailfree ) => {
-            
-           if( isemailfree ){
-               console.log("Yes, User is ok: " + isemailfree );
-               const createuser = s.doCreateUser( connectionString, req.body.email, req.body.password, req.body.title, req.body.firstName, req.body.lastName, req.body.role );
-               res.status(200).send( { message: 'The User was created!'} ); 
-               }
-           else {
-                console.log("Ups, User not OK: " + isemailfree );
-                res.status(400).send( { message: 'Error creating User: The Email is not valid!'} ); 
-               }
-           }); 
-
+          // Consuming Promises: First a function to check if the email is already used by another User
+          let promisevalidate = s.ValidateMailCreateUser( connectionString, req.body.email );
+          promisevalidate.then(( isemailfree ) => {
+                          
+             // Chaining Promises: If the email is free try to create the User and if the User 
+             // was created return true to the next THEN
+             if( isemailfree ){
+                  console.log("The User email is free - inside the Controller first THEN: " + isemailfree );
+                  usercreated = s.doCreateUser( connectionString, req.body.email, req.body.password, req.body.title, req.body.firstName, req.body.lastName, req.body.role );
+                  return usercreated;
+                  }
+              else {
+                   console.log("The User email is NOT free - inside the Controller first THEN: " + isemailfree );
+                   res.status(400).send( { message: 'The User was not created because the Email is already in use !'} );
+                  }     
+                                
+             }).then(( usercreated ) => {
+                 
+                 // Note: Here verification email could be send because of the fact that the email was not
+                 // used by another User and the User was created successfully !
+                 // For now a 200 status code is send back to the client CLIENT :-) 
+                 if(  usercreated  ){ 
+                      console.log("The User was created - inside the Controller second THEN: " +  usercreated  );
+                      res.status(200).send( { message: 'The User was created successfully !' } );  
+                     }
+                 else 
+                      console.log("The User was not created - inside the Controller second THEN: " +  usercreated );
+                   
+              }).catch( error => {
+                    console.log( "SQL error from Promise displayed in catch - Controller: " + error );
+                    res.status(400).send( { message: 'The User was not created due to an SQL error inside Service !'} );
+             });
+       
          }
     else {
-         console.log("The User are not valid...");
-         res.status(400).send( { message: 'Error creating User: You need to enter valid values!'} );
-        } 
+          console.log("The User was not created because of wrong input values !");
+          res.status(400).send( { message: 'The User was not created because of wrong input values !' } );
+         } 
 
 }); 

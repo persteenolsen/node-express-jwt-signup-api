@@ -10,16 +10,15 @@ class UserLoginService {
  // const users = [{ id: 1, email: 'persteen@test.dk', passwordhash: 'mypass123', title: 'Mr', role: 'Admin', firstName: 'Per Steen', lastName: 'Olsen' }];
 
    
- async authenticate( con, email, password ) {
+  async authenticate( con, email, password ) {
 
-      try {
-           let hasuser = false;
-           let userWithJwt = [];
+       let userWithJwt = [];
       
-           await new Promise((res, rej) => {
+          await new Promise((resolve, reject) => {
               
            con.query("SELECT id, title, firstName, lastName, role, email, passwordhash, isVerified FROM node_crud_signup_jwt where email LIKE '" + email + "'" , function (err, result, fields) {
-           if (err) throw err;
+           if ( err ) 
+                reject( true );
             else {
                    
                  if( result.length === 1 ){
@@ -41,37 +40,28 @@ class UserLoginService {
                           
                             userWithJwt = { ...userWithoutPassword, ...jwttoken };
                             console.log( userWithJwt );
-
-                            hasuser = true;
-                            res( true );  
-                                        
-                          }
-                          else {
+                            resolve( true );  
+                             }
+                        else {
                                 console.log('Users Password does not match in Service !');
-                                hasuser = false;
                                 userWithJwt = null;
-                                res( false );  
+                                resolve( false );  
                              }
                          }
 
                    else {
                          console.log( 'Users Email does not match in Service !' );
-                         hasuser = false;
                          userWithJwt = null;
-                         res( false );
+                         resolve( false );
                      }
                    }
                 });
           
               });
-                  
-              return  userWithJwt;
-
-              } 
-              catch (err) {
-                 console.log(err)
-               }
-      }   
+              
+              // The User with JWT token is returned implicit wrapped in a promise 
+               return userWithJwt;
+        }   
 
 }
 

@@ -20,9 +20,10 @@ router.post('/authenticate', function (req, res, next) {
     const password = req.body.password;
     const email = req.body.email;
 
-    const User = s.authenticate( connectionString, email, password );
+    const user = s.authenticate( connectionString, email, password );
+    console.log("User Object wrapped in a Promise from Login Service - Controller! " + user );
 
-    User.then(( userlogin ) => {
+    user.then(( userlogin ) => {
              
         if( userlogin ){
             console.log("Yes, 1 User ready for logging in at the Controller! " );
@@ -33,6 +34,10 @@ router.post('/authenticate', function (req, res, next) {
              console.log("Ups, No Users ready for login at the Controller! " );
              res.status(400).send( { message: 'You entered wrong Email or Password !'} ); 
             }
-        }); 
+
+     }).catch( error => {
+             console.log( "SQL error from Promise displayed in catch - Controller: " + error );
+             res.status(400).send( { message: 'The User was not logged in due to an SQL error inside Service !'} );
+     });
  
  }); 

@@ -4,6 +4,7 @@ const mysql = require('mysql');
 
 class DatabaseConfig {
 
+  
   getDBConnectionPool(){
 
     const pool = mysql.createPool({
@@ -12,11 +13,10 @@ class DatabaseConfig {
       user: 'mydbuser',
       password: 'mydbpassword',
       database: 'mydbname'
-  });
+    });
 
   return pool;
 }
-
 
 
 }

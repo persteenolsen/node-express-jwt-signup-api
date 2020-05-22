@@ -26,7 +26,7 @@ app.get('/test', function (req, res) {
  
 // api routes
 app.use('/users', require('./users/user.login.controller'));
-app.use('/users', require('./users/user.register.controller'));
+app.use('/users', require('./users/user.register.validate.controller'));
 
 app.use('/users', require('./users/user.get.controller'));
 app.use('/users', require('./users/user.delete.controller'));

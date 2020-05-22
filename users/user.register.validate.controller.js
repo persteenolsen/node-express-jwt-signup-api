@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const DatabaseConfig = require('../db/database.config');
-const UserRegisterService = require('./user.register.service');
+const UserRegisterService = require('./user.register.validate.service');
 const UserValidate = require('./user.validate');
 
 
@@ -18,7 +18,6 @@ router.post('/register', function (req, res, next) {
     // If all user data are valid add the User
     if ( inputdatavalid == true ){
             
-        let registereduser = false;
          const dbconfig = new DatabaseConfig();
          const connectionString = dbconfig.getDBConnectionPool();
          var s = new UserRegisterService();
@@ -36,24 +35,24 @@ router.post('/register', function (req, res, next) {
                  }
              else {
                   console.log("The User email is NOT free - inside the Controller first THEN: " + isemailfree );
-                  // Note: Insted of return false a response could be sent to the client about email not free
-                  // res.status(400).send( { message: 'The User was not registered because of wrong Email!'} );
-                  return false;
-                 }     
+                  res.status(400).send( { message: 'The User was not registered because the Email is already in use !'} );
+                  }     
                                
             }).then(( userregistered ) => {
                 
-                // Note: Here verification eemail could be send because of the fact that the email was not
+                // Note: Here verification email could be send because of the fact that the email was not
                 // used by another User and the User was registered successfully !
                 // For now a 200 status code is send back to the client CLIENT :-) 
                 if( userregistered ){ 
                      console.log("The User was registered - inside the Controller second THEN: " + userregistered );
-                     res.status(200).send( { message: 'The User was registered !' } );  
+                     res.status(200).send( { message: 'The User was registered successfully !' } );  
                     }
-                else {
+                else 
                      console.log("The User was not registered - inside the Controller second THEN: " + userregistered );
-                     res.status(400).send( { message: 'The User was not registered !'} );
-                    }
+                   
+            }).catch( error => {
+               console.log( "SQL error from Promise displayed in catch - Controller: " + error );
+               res.status(400).send( { message: 'The User was not registered due to an SQL error inside Service !'} );
             });
          
          }

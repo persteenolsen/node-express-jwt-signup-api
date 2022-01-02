@@ -13,7 +13,7 @@ class DatabaseConfig {
       user: 'mydbuser',
       password: 'mydbpassword',
       database: 'mydbname'
-    });
+     });
 
      return pool;
   }
